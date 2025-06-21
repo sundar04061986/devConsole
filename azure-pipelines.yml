@@ -1,0 +1,50 @@
+# azure-pipelines.yml
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration Release'
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '**/*.csproj'
+        zipAfterPublish: true
+        modifyOutputPath: true
+        #outputPath: '$(Build.ArtifactStagingDirectory)/WebApp' # Example path
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+- stage: Deploy
+  jobs:
+  - deployment: DeployToDev
+    environment: 'dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              buildType: 'current'
+              artifactName: 'drop'
+              downloadPath: '$(System.DefaultWorkingDirectory)'
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Example script to copy the artifact to a specific location
+                # Replace with your deployment logic
+                Copy-Item -Path "$(System.DefaultWorkingDirectory)/*" -Destination "C:\deploy\app" -Recurse
