@@ -10,9 +10,8 @@ steps:
   inputs:
     azureSubscription: 'MydevOpsCon'
     command: 'build'
-    projects: '''**/*.csproj'''
+    projects: '''**/*.cs'''
     arguments: '-r win-x64 -p:PublishSingleFile=True --self-contained false -o $(Build.ArtifactStagingDirectory)'
-    publishWebProjects: false
   enabled: true 
      
   
