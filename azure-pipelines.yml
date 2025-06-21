@@ -5,10 +5,15 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-stages:
-- stage: Build
-  jobs:
-  - job: Build
-    steps:
-    - task: DotNetCoreCLI@2
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    azureSubscription: 'MydevOpsCon'
+    command: 'build'
+    projects: '''**/*.csproj'''
+    arguments: '-r win-x64 -p:PublishSingleFile=True --self-contained false -o $(Build.ArtifactStagingDirectory)'
+    publishWebProjects: false
+  enabled: true 
+     
+  
      
